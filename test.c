@@ -57,7 +57,12 @@ int main(){
 	name = rchosen();
 	printf("choose region: %s\n\n", name);
 
-
+	char *c1 = ralloc(200);
+	printf("Pointer *c1 is point at %p.\n", c1);	
+	char *c2 = ralloc(500);
+	printf("Pointer *c2 is point at %p.\n", c2);
+	char *c3 = ralloc(sizeof(int)*100);
+	printf("Pointer *c3 is point at %p.\n", c3);
 	return EXIT_SUCCESS;
 }
 

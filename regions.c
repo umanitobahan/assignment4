@@ -6,6 +6,15 @@
 #include "regions.h"
 
 typedef struct RNODE rnode;
+typedef struct BLOCK block;
+
+
+struct BLOCK{
+	char region[200];
+	void *address;
+	int size;
+	block *next;
+};
 
 struct RNODE{
 	char name[200];
@@ -18,7 +27,7 @@ struct RNODE{
 static rnode *top = NULL;
 static rnode *choosed = NULL;
 static rnode *traverse = NULL;
-
+static block *first = NULL;
 
 
 Boolean rinit(const char *region_name, r_size_t region_size){
@@ -100,11 +109,49 @@ const char *rchosen(){
 
 void *ralloc(r_size_t block_size){
 	assert(block_size > 0);
-	int useds = 0;
+	block *curr = NULL;
+	int rest = 0;
+	char *ch = NULL;
+	char *result = NULL;
+	//int count = 0;
 	if(block_size > 0){
-		useds = block_size + choosed->size;
-		if(useds <= choosed->size){
-			
+		rest = choosed->size - choosed->used;
+		if(block_size <= rest){
+			curr = (void *)malloc(sizeof(block));
+			assert(curr != NULL);
+			if(curr != NULL){
+				printf("alloc block successfully!\n");
+				strcpy(curr->region, choosed->name);
+				printf("The block in %s region!\n", curr->region);
+				curr->size = block_size;
+				printf("the size of the block is %d\n", curr->size);
+				curr->address = choosed->pt + choosed->used;
+				printf("the pointer of the block is point at %p\n", curr->address);
+				choosed->used += block_size;
+				printf("The %s region used %d bits of memory\n", choosed->name, choosed->used);
+				for(void *ptr=curr->address; ptr<curr->address+block_size; ptr++){
+					//count++;
+					//printf("ptr address is:  %p\n", ptr);
+					ch = ptr;
+					//printf("ch address is: %p\n", ch);
+					(*ch) = '\0';
+				}
+				//printf("block size is: %d and the count is: %d \n", block_size, count);
+					if(first == NULL){
+						curr->next = NULL;
+						first = curr;
+					}
+					else if(first != NULL){
+						curr->next = first;
+						first = curr;
+					}
+				result = curr->address;
+			}	
 		}
 	}
+	return result;
+}
+
+r_size_t rsize(void *block_ptr){
+	
 }
