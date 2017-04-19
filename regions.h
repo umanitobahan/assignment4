@@ -10,9 +10,10 @@
 	Boolean rchoose(const char *region_name);
 	const char *rchosen();
 	void *ralloc(r_size_t block_size);
-	//r_size_t rsize(void *block_ptr);
-	//Boolean rfree(void *block_ptr);
+	r_size_t rsize(void *block_ptr);
+	Boolean rfree(void *block_ptr);
 	//void rdestory(const char *region_name);
 	//void rdump();
-
+	void printAll();
+	void printRegions();
 #endif

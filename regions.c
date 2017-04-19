@@ -14,6 +14,7 @@ struct BLOCK{
 	void *address;
 	int size;
 	block *next;
+	block *pre;
 };
 
 struct RNODE{
@@ -21,13 +22,16 @@ struct RNODE{
 	int size;
 	void *pt;
 	rnode *next;
+	rnode *pre;
 	int used;
+	block *bt;
+	
 };
 
 static rnode *top = NULL;
 static rnode *choosed = NULL;
 static rnode *traverse = NULL;
-static block *first = NULL;
+
 
 
 Boolean rinit(const char *region_name, r_size_t region_size){
@@ -60,15 +64,19 @@ Boolean rinit(const char *region_name, r_size_t region_size){
 					strcpy(curr->name, region_name);
 					curr->size = region_size;
 					curr->used = 0;
+					curr->bt = NULL;
 					if(temp == NULL){
 						curr->next = NULL;
+						curr->pre = NULL;
 						choosed = curr;
 						top = curr;
 					}
 					else{
-					curr->next = temp;
-					choosed = curr;
-					top = curr;
+						curr->next = temp;
+						curr->pre = NULL;
+						temp->pre = curr;
+						choosed = curr;
+						top = curr;
 					}
 				}
 				else{
@@ -108,12 +116,12 @@ const char *rchosen(){
 }
 
 void *ralloc(r_size_t block_size){
+	block *first = choosed->bt;
 	assert(block_size > 0);
 	block *curr = NULL;
 	int rest = 0;
 	char *ch = NULL;
 	char *result = NULL;
-	//int count = 0;
 	if(block_size > 0){
 		rest = choosed->size - choosed->used;
 		if(block_size <= rest){
@@ -130,21 +138,21 @@ void *ralloc(r_size_t block_size){
 				choosed->used += block_size;
 				printf("The %s region used %d bits of memory\n", choosed->name, choosed->used);
 				for(void *ptr=curr->address; ptr<curr->address+block_size; ptr++){
-					//count++;
-					//printf("ptr address is:  %p\n", ptr);
 					ch = ptr;
-					//printf("ch address is: %p\n", ch);
 					(*ch) = '\0';
 				}
-				//printf("block size is: %d and the count is: %d \n", block_size, count);
 					if(first == NULL){
 						curr->next = NULL;
+						curr->pre = NULL;
 						first = curr;
 					}
 					else if(first != NULL){
 						curr->next = first;
+						curr->pre = NULL;
+						first->pre = curr;
 						first = curr;
 					}
+				choosed->bt = first;
 				result = curr->address;
 			}	
 		}
@@ -152,6 +160,74 @@ void *ralloc(r_size_t block_size){
 	return result;
 }
 
-r_size_t rsize(void *block_ptr){
-	
+void printAll(){
+	block *temp = choosed->bt;
+	while(temp != NULL){
+		printf("BLOCK: %p  SIZE: %d\n", temp->address, temp->size);
+		temp = temp->next;	
+	}	
 }
+
+void printRegions(){
+	rnode *temp = top;
+	while(temp != NULL){
+		printf("REGION :   %s\n", temp->name);
+		temp = temp->next;
+	}
+}
+
+r_size_t rsize(void *block_ptr){
+	assert(block_ptr != NULL);
+	block *temp = choosed->bt;
+	int size = 0;
+	if(block_ptr != NULL){
+		while(temp != NULL){
+			if(temp->address == block_ptr){
+				size = temp->size;
+			}
+			temp = temp->next;
+		}
+	}
+	return size;
+}
+
+Boolean rfree(void *block_ptr){
+	assert(block_ptr != NULL);
+	block *temp = choosed->bt;
+	block *pre = NULL;
+	block *follow = NULL;
+	Boolean result = false;
+	if(block_ptr != NULL){
+		while(temp != NULL){
+			if(temp->address == block_ptr){
+				temp->address = NULL;
+				pre = temp->pre;
+				if(pre != NULL){
+					pre->next = temp->next;
+					temp->pre = NULL;
+					temp->next = NULL;
+					free(temp);
+					result = true;
+					temp = pre->next;
+				}
+				else{
+					follow = temp->next;
+					if(follow != NULL){
+						follow->pre = NULL;
+					}
+					temp->pre = NULL;
+					temp->next = NULL;
+					free(temp);
+					result = true;
+					temp = follow;		
+				}
+			}
+			else{
+				temp = temp->next;
+			}
+		}
+	}
+	return result;
+}
+
+

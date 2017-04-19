@@ -61,8 +61,30 @@ int main(){
 	printf("Pointer *c1 is point at %p.\n", c1);	
 	char *c2 = ralloc(500);
 	printf("Pointer *c2 is point at %p.\n", c2);
-	char *c3 = ralloc(sizeof(int)*100);
-	printf("Pointer *c3 is point at %p.\n", c3);
+	char *c3 = ralloc(100);
+	printf("Pointer *c3 is point at %p.\n\n\n", c3);
+
+	printAll();
+	printRegions();
+	printf("size if c1 is : %d\n",rsize(c1));
+	rsize(c2);
+	printf("size if c2 is : %d\n",rsize(c2));
+	rsize(c3); 
+	printf("size if c3 is : %d\n",rsize(c3));
+
+	Boolean fr = rfree(s3);
+	printf("Free? : %d\n", fr);
+	fr = rfree(c2);
+	printf("Free? : %d\n", fr);
+	fr = rfree(s2);
+	printf("Free? : %d\n", fr);
+	fr = rfree(c1);
+	printf("Free? : %d\n", fr);
+	fr = rfree(s1);
+	printf("Free? : %d\n", fr);
+	fr = rfree(c3);
+	printf("Free? : %d\n", fr); 	
+
 	return EXIT_SUCCESS;
 }
 
