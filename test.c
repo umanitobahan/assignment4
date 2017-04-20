@@ -74,16 +74,18 @@ int main(){
 
 	Boolean fr = rfree(s3);
 	printf("Free? : %d\n", fr);
-	fr = rfree(c2);
+	/*fr = rfree(c2);
 	printf("Free? : %d\n", fr);
 	fr = rfree(s2);
 	printf("Free? : %d\n", fr);
 	fr = rfree(c1);
 	printf("Free? : %d\n", fr);
 	fr = rfree(s1);
-	printf("Free? : %d\n", fr);
+	printf("Free? : %d\n", fr);*/
 	fr = rfree(c3);
-	printf("Free? : %d\n", fr); 	
+	printf("Free? : %d\n", fr);
+	rdump();
+	printAll();
 
 	return EXIT_SUCCESS;
 }

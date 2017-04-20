@@ -24,7 +24,7 @@ struct RNODE{
 	rnode *next;
 	rnode *pre;
 	int used;
-	block *bt;
+	block *bt;//the first pointer of block
 	
 };
 
@@ -194,21 +194,33 @@ r_size_t rsize(void *block_ptr){
 Boolean rfree(void *block_ptr){
 	assert(block_ptr != NULL);
 	block *temp = choosed->bt;
+	block *first = choosed->bt;
 	block *pre = NULL;
 	block *follow = NULL;
 	Boolean result = false;
+	int bsize = 0;
 	if(block_ptr != NULL){
 		while(temp != NULL){
 			if(temp->address == block_ptr){
+				if(block_ptr == first->address){
+					choosed->bt = temp->next;
+					first = choosed->bt;
+				}
+				bsize = temp->size;
 				temp->address = NULL;
 				pre = temp->pre;
 				if(pre != NULL){
 					pre->next = temp->next;
+					follow = temp->next;
+					if(follow != NULL){
+						follow->pre = temp->pre;
+					}
 					temp->pre = NULL;
 					temp->next = NULL;
 					free(temp);
+					choosed->used = choosed->used - bsize;
 					result = true;
-					temp = pre->next;
+					temp = follow;
 				}
 				else{
 					follow = temp->next;
@@ -218,6 +230,7 @@ Boolean rfree(void *block_ptr){
 					temp->pre = NULL;
 					temp->next = NULL;
 					free(temp);
+					choosed->used = choosed->used - bsize;
 					result = true;
 					temp = follow;		
 				}
@@ -230,4 +243,26 @@ Boolean rfree(void *block_ptr){
 	return result;
 }
 
-
+void rdump(){
+	rnode *rtemp = NULL;
+	block *btemp = NULL;
+	int rest = 0;
+	rtemp = top;
+	while(rtemp != NULL){
+		printf("Region Name : %s\n", rtemp->name);
+		btemp = rtemp->bt;
+		if(btemp == NULL){
+			printf("There is no block in this region\n");
+		}
+		else{
+			printf("Block pointers and size in region \"%s\" is :\n", rtemp->name);
+			while(btemp != NULL){
+				printf(" %p, %d bytes\n", btemp->address, btemp->size);
+				btemp = btemp->next; 
+			}
+		}
+		rest = rtemp->size - rtemp->used;
+		printf("The unused space is %d bytes\n\n", rest);
+		rtemp = rtemp->next;
+	}
+}
